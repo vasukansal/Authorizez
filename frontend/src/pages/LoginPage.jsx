@@ -3,15 +3,20 @@ import Input from "../components/input"
 import { Meteors } from "../components/meteors";
 import { motion } from 'framer-motion'
 import { Lock, Mail, Loader } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { useAuthStore } from "../store/authStore";
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const isLoading = false;
-    const handleLogin = (e) => {
-        e.preventDefault()
-    }
+    const { login, isLoading, error } = useAuthStore();
+    const navigate = useNavigate();
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        await login(email, password);
+        console.log("Final Before Navigating")
+        navigate('/')
+    };
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
             className="max-w-md w-full bg-gray-800 bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden">
@@ -31,7 +36,7 @@ const LoginPage = () => {
                         </Link>
 
                     </div>
-
+                    {error && <p className="text-red-500 font-semibold mb-2">{error}</p>}
                     <motion.button className="mt-5 w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-fuchsia-800
                      hover:from-blue-600 hover:to-fuchsia-600 text-white font-bold rounded-lg transition duration-200
                      focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-offset-2 focus:ring-offset-gray-900"

@@ -2,15 +2,26 @@ import { Meteors } from "../components/meteors";  // Import the Meteors componen
 import { motion } from "framer-motion"
 import Input from "../components/input"
 import PasswordStrengthMeter from "../components/passwordStrengthMeter";
-import { Lock, Mail, User } from "lucide-react"
+import { Loader, Lock, Mail, User } from "lucide-react"
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { useAuthStore } from "../store/authStore";
 const SignUpPage = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const handleSignUp = (e) => {
-        e.preventDefault()
+    const navigate = useNavigate();
+    const { signup, error, isLoading } = useAuthStore();
+    const handleSignUp = async (e) => {
+        e.preventDefault();
+        try {
+            await signup(email, password, name);
+            navigate("/EmailVerification");
+        }
+        catch (error) {
+            console.log(error);
+
+        }
     }
     return (
 
@@ -30,13 +41,18 @@ const SignUpPage = () => {
                     <Input icon={User} type="text" placeholder="Full Name" value={name} onChange={(e) => setName(e.target.value)}></Input>
                     <Input icon={Mail} type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)}></Input>
                     <Input icon={Lock} type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)}></Input>
+                    {error && <p className="text-red-500 font-semibold mt-2 ">{error} </p>}
                     <PasswordStrengthMeter password={password}></PasswordStrengthMeter>
                     <motion.button className="mt-5 w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-fuchsia-800
                      hover:from-blue-600 hover:to-fuchsia-600 text-white font-bold rounded-lg transition duration-200
                      focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-offset-2 focus:ring-offset-gray-900"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.98 }}
-                        type="submit">Sign Up</motion.button>
+                        type="submit"
+                        disabled={isLoading}>
+
+                        {isLoading ? <Loader className="animate-spin mx-auto" size={24} /> : "SignUp"}
+                    </motion.button>
 
 
                 </form>
