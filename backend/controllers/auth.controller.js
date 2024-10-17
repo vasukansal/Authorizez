@@ -21,7 +21,7 @@ export const Login=async (req,res)=>{
                 generateTokenAndSetCookie(res,user._id);
                 user.lastlogindate=new Date();
                 await user.save();
-                return res.status(200).json({success:true, message:"Logged in successfully", user:{name:user.name}});
+                return res.status(200).json({success:true, message:"Logged in successfully", user:{name:user.name, isVerified:user.isVerified}});
             }
         }
     } catch (error) {
@@ -61,7 +61,7 @@ export const Signup=async (req,res)=>{
         //Mail sending function called
         await sendingVerificationMail(user.email,verificationToken);
 
-        return res.status(201).json({success:true, message:"User created Successfully"});}
+        return res.status(201).json({success:true, message:"User created Successfully", user:{...user._doc, password:undefined},});}
 
 
     } catch (error) {
@@ -86,7 +86,10 @@ export const VerifyEmail= async (req,res)=>{
             user.verificationTokenExpiresat=undefined;
             await user.save();
             await WelcomeEmail(user.email,user.name);
-            return res.status(201).json({success:true, message:"Email Verified Successfully"});  
+            return res.status(201).json({success:true, message:"Email Verified Successfully",user: {
+				...user._doc,
+				password: undefined,
+			},});  
         }
     } catch (error) {
         console.log("Error verifying email ",error);
